@@ -205,14 +205,21 @@ def sync_once(config=None):
         ts_str = datetime.fromtimestamp(msg.get("date", time.time())).strftime("%Y%m%d_%H%M%S")
         caption = msg.get("caption", "").strip()
 
+        def get_collision_free_path(base_dir, filename):
+            target = os.path.join(base_dir, filename)
+            if not os.path.exists(target):
+                return target
+            root, ext = os.path.splitext(filename)
+            counter = 1
+            while os.path.exists(os.path.join(base_dir, f"{root}_{counter}{ext}")):
+                counter += 1
+            return os.path.join(base_dir, f"{root}_{counter}{ext}")
+
         # 1. Document
         if "document" in msg:
             doc = msg["document"]
-            orig_name = doc.get("file_name", f"doc_{ts_str}.bin")
-            save_path = os.path.join(inbox_dir, orig_name)
-            if os.path.exists(save_path):
-                b, e = os.path.splitext(orig_name)
-                save_path = os.path.join(inbox_dir, f"{b}_{ts_str}{e}")
+            orig_name = doc.get("file_name", f"doc_{ts_str}_{up_id}.bin")
+            save_path = get_collision_free_path(inbox_dir, orig_name)
             download_telegram_file(token, doc["file_id"], save_path)
             
             # Rule 1 auto-compression if PDF > 1MB
@@ -230,11 +237,16 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 2. Photo
+        # 2. Photo (with collision-free naming for burst/album sends)
         elif "photo" in msg:
             photo = msg["photo"][-1]
-            save_path = os.path.join(inbox_dir, f"screenshot_{ts_str}_{photo['file_id'][:6]}.jpg")
-            download_telegram_file(token, photo["file_id"], save_path)
+            file_id = photo["file_id"]
+            file_unique_id = photo.get("file_unique_id", "")
+            unique_tag = f"_{file_unique_id[:8]}" if file_unique_id else f"_{up_id}"
+            raw_name = f"photo_{ts_str}_{up_id}{unique_tag}.jpg"
+            save_path = get_collision_free_path(inbox_dir, raw_name)
+            
+            download_telegram_file(token, file_id, save_path)
             is_trig, clean_cmd = parse_trigger(caption)
             ledger_mgr.record_item(up_id, msg.get("date", time.time()), save_path, "photo", caption, is_trig, clean_cmd)
             processed.append(f"Photo: {os.path.basename(save_path)}")
@@ -253,9 +265,39 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 3. Voice
+        # 3. Video
+        elif "video" in msg:
+            video = msg["video"]
+            file_id = video["file_id"]
+            raw_name = video.get("file_name", f"video_{ts_str}_{up_id}.mp4")
+            save_path = get_collision_free_path(inbox_dir, raw_name)
+            download_telegram_file(token, file_id, save_path)
+            is_trig, clean_cmd = parse_trigger(caption)
+            ledger_mgr.record_item(up_id, msg.get("date", time.time()), save_path, "video", caption, is_trig, clean_cmd)
+            processed.append(f"Video: {os.path.basename(save_path)}")
+            if is_trig:
+                tele_disp.send_text(f"IMMEDIATE TRIGGER ACKNOWLEDGED for Video. Processing now.")
+            else:
+                tele_disp.send_text(f"Buffered video to Antigravity Inbox: `{os.path.basename(save_path)}`.")
+
+        # 4. Audio
+        elif "audio" in msg:
+            audio = msg["audio"]
+            file_id = audio["file_id"]
+            raw_name = audio.get("file_name", f"audio_{ts_str}_{up_id}.mp3")
+            save_path = get_collision_free_path(inbox_dir, raw_name)
+            download_telegram_file(token, file_id, save_path)
+            is_trig, clean_cmd = parse_trigger(caption)
+            ledger_mgr.record_item(up_id, msg.get("date", time.time()), save_path, "audio", caption, is_trig, clean_cmd)
+            processed.append(f"Audio: {os.path.basename(save_path)}")
+            if is_trig:
+                tele_disp.send_text(f"IMMEDIATE TRIGGER ACKNOWLEDGED for Audio. Processing now.")
+            else:
+                tele_disp.send_text(f"Buffered audio to Antigravity Inbox: `{os.path.basename(save_path)}`.")
+
+        # 5. Voice
         elif "voice" in msg:
-            save_path = os.path.join(inbox_dir, f"voice_{ts_str}.oga")
+            save_path = get_collision_free_path(inbox_dir, f"voice_{ts_str}_{up_id}.oga")
             download_telegram_file(token, msg["voice"]["file_id"], save_path)
             is_trig, clean_cmd = parse_trigger(caption)
             ledger_mgr.record_item(up_id, msg.get("date", time.time()), save_path, "voice", caption, is_trig, clean_cmd)
@@ -265,7 +307,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered voice note to Inbox: `{os.path.basename(save_path)}`.")
 
-        # 4. Text
+        # 6. Text
         elif "text" in msg:
             raw_text = msg["text"].strip()
             is_trig, clean_cmd = parse_trigger(raw_text)
