@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antigravity-cloud-bridge"
+version = "1.0.0"
+authors = [
+  { name="Raj Chhapariya" },
+]
+description = "Autonomous Two-Way Telegram & Resend Ingestion Daemon, Document Sanitizer, and Binary Asset Dispatcher for Agentic AI Coding Assistants."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Communications :: Chat",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "python-docx>=1.1.0",
+    "python-pptx>=1.0.0",
+    "openpyxl>=3.1.2",
+    "pymupdf>=1.24.0",
+    "pdf2image>=1.17.0",
+    "pillow>=10.0.0",
+    "pypdf>=4.0.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/rajchhapariya/antigravity-cloud-bridge"
+"Bug Tracker" = "https://github.com/rajchhapariya/antigravity-cloud-bridge/issues"
+
+[project.scripts]
+antigravity-bridge = "antigravity_bridge.cli:main"
