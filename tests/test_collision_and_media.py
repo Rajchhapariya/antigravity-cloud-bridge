@@ -19,17 +19,17 @@ class TestCollisionFreePath(unittest.TestCase):
                     counter += 1
                 return os.path.join(base_dir, f"{root}_{counter}{ext}")
 
-            # 1. First file
+            # First file
             p1 = get_collision_free_path(tmp_dir, "photo_20260925_120000.jpg")
             with open(p1, "w") as f:
                 f.write("photo 1")
 
-            # 2. Second file with same base name
+            # Second file with same base name
             p2 = get_collision_free_path(tmp_dir, "photo_20260925_120000.jpg")
             with open(p2, "w") as f:
                 f.write("photo 2")
 
-            # 3. Third file with same base name
+            # Third file with same base name
             p3 = get_collision_free_path(tmp_dir, "photo_20260925_120000.jpg")
             with open(p3, "w") as f:
                 f.write("photo 3")

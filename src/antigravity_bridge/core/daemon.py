@@ -31,7 +31,7 @@ def parse_trigger(raw_text):
 def handle_autonomous_doc(clean_cmd, ai_resolver, telegram_dispatcher, base_dir):
     cmd_lower = clean_cmd.lower()
 
-    # 1. Word / Docx
+    # Word / Docx
     if any(k in cmd_lower for k in ["dock", "docx", "word doc", "word file", "create doc", "doc file", "a doc"]):
         prompt = (
             f"Generate a professional document outline for: '{clean_cmd}'. "
@@ -53,7 +53,7 @@ def handle_autonomous_doc(clean_cmd, ai_resolver, telegram_dispatcher, base_dir)
         telegram_dispatcher.send_document(out_f, caption=f"Generated Word Document: {title}")
         return True, f"Word Doc: {title}"
 
-    # 2. PDF Document
+    # PDF Document
     elif any(k in cmd_lower for k in ["pdf", "apdf", "create pdf", "make a pdf", "generate pdf"]):
         prompt = (
             f"Generate a structured formal PDF report outline for: '{clean_cmd}'. "
@@ -75,7 +75,7 @@ def handle_autonomous_doc(clean_cmd, ai_resolver, telegram_dispatcher, base_dir)
         telegram_dispatcher.send_document(out_f, caption=f"Generated PDF Document: {title}")
         return True, f"PDF: {title}"
 
-    # 3. PowerPoint / PPTX
+    # PowerPoint / PPTX
     elif any(k in cmd_lower for k in ["ppt", "pptx", "presentation", "slides"]):
         prompt = (
             f"Generate professional presentation slides for: '{clean_cmd}'. "
@@ -99,7 +99,7 @@ def handle_autonomous_doc(clean_cmd, ai_resolver, telegram_dispatcher, base_dir)
         telegram_dispatcher.send_document(out_f, caption=f"Generated PowerPoint: {title}")
         return True, f"PowerPoint: {title}"
 
-    # 4. Excel / XLSX
+    # Excel / XLSX
     elif any(k in cmd_lower for k in ["excel", "xlsx", "spreadsheet", "sheet"]):
         prompt = (
             f"Generate tabular spreadsheet data for: '{clean_cmd}'. "
@@ -123,7 +123,7 @@ def handle_autonomous_doc(clean_cmd, ai_resolver, telegram_dispatcher, base_dir)
         telegram_dispatcher.send_document(out_f, caption=f"Generated Spreadsheet: {title}")
         return True, f"Excel: {title}"
 
-    # 5. Standalone Web App
+    # Standalone Web App
     elif any(k in cmd_lower for k in ["create app", "create an app", "web app", "build an app", "build app", "make an app"]):
         prompt = (
             f"Build a complete single-file HTML/CSS/JS progressive web application for: '{clean_cmd}'. "
@@ -215,7 +215,7 @@ def sync_once(config=None):
                 counter += 1
             return os.path.join(base_dir, f"{root}_{counter}{ext}")
 
-        # 1. Document
+        # Document
         if "document" in msg:
             doc = msg["document"]
             orig_name = doc.get("file_name", f"doc_{ts_str}_{up_id}.bin")
@@ -237,7 +237,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 2. Photo (with collision-free naming for burst/album sends)
+        # Photo (with collision-free naming for burst/album sends)
         elif "photo" in msg:
             photo = msg["photo"][-1]
             file_id = photo["file_id"]
@@ -265,7 +265,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 3. Video
+        # Video
         elif "video" in msg:
             video = msg["video"]
             file_id = video["file_id"]
@@ -280,7 +280,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered video to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 4. Audio
+        # Audio
         elif "audio" in msg:
             audio = msg["audio"]
             file_id = audio["file_id"]
@@ -295,7 +295,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered audio to Antigravity Inbox: `{os.path.basename(save_path)}`.")
 
-        # 5. Voice
+        # Voice
         elif "voice" in msg:
             save_path = get_collision_free_path(inbox_dir, f"voice_{ts_str}_{up_id}.oga")
             download_telegram_file(token, msg["voice"]["file_id"], save_path)
@@ -307,7 +307,7 @@ def sync_once(config=None):
             else:
                 tele_disp.send_text(f"Buffered voice note to Inbox: `{os.path.basename(save_path)}`.")
 
-        # 6. Text
+        # Text
         elif "text" in msg:
             raw_text = msg["text"].strip()
             is_trig, clean_cmd = parse_trigger(raw_text)

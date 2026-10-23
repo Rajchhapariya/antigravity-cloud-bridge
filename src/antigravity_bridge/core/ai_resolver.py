@@ -25,7 +25,7 @@ class AIResolver:
         )
         system_inst = system_override or config_inst or default_system
 
-        # 1. High-Speed Direct OpenAI Engine (gpt-4o-mini)
+        # High-Speed Direct OpenAI Engine (gpt-4o-mini)
         openai_key = self.config.get("OPENAI_API_KEY")
         if openai_key:
             try:
@@ -50,7 +50,7 @@ class AIResolver:
             except Exception as e:
                 print(f"[AIResolver] OpenAI provider failed: {e}", file=sys.stderr)
 
-        # 2. Google Gemini REST Engine
+        # Google Gemini REST Engine
         gemini_key = self.config.get("GEMINI_API_KEY")
         if gemini_key:
             for m in ["models/gemini-3.8-flash", "models/gemini-flash-latest", "models/gemini-2.5-flash"]:
@@ -74,7 +74,7 @@ class AIResolver:
                 except Exception:
                     continue
 
-        # 3. OpenRouter Free Fallback
+        # OpenRouter Free Fallback
         openrouter_key = self.config.get("OPENROUTER_API_KEY")
         if openrouter_key:
             try:
